@@ -1,9 +1,12 @@
 
 import { useState } from 'react';
-import { ChevronDown, User } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Bug, TeamMember } from '@/pages/Index';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface BugCardProps {
   bug: Bug;
@@ -17,10 +20,10 @@ const BugCard = ({ bug, teamMembers, onUpdateBug }: BugCardProps) => {
 
   const assignedMember = teamMembers.find(member => member.id === bug.assignee);
   
-  const statusColors = {
-    open: 'bg-red-100 text-red-800 border-red-200',
-    'in-progress': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    done: 'bg-green-100 text-green-800 border-green-200'
+  const statusConfig = {
+    open: { variant: 'destructive' as const, label: 'Open' },
+    'in-progress': { variant: 'default' as const, label: 'In Progress' },
+    done: { variant: 'secondary' as const, label: 'Done' }
   };
 
   const handleStatusChange = (newStatus: Bug['status']) => {
@@ -40,27 +43,27 @@ const BugCard = ({ bug, teamMembers, onUpdateBug }: BugCardProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <h3 className="font-medium text-gray-900 line-clamp-2 flex-1 mr-2">
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="font-medium text-card-foreground line-clamp-2 flex-1 mr-2">
             {bug.title}
           </h3>
-          <div className="flex items-center gap-2">
-            <Select value={bug.status} onValueChange={handleStatusChange}>
-              <SelectTrigger className={`text-xs px-2 py-1 h-auto border ${statusColors[bug.status]}`}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="open">Open</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={bug.status} onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-auto h-auto p-0 border-0 bg-transparent">
+              <Badge variant={statusConfig[bug.status].variant} className="text-xs">
+                {statusConfig[bug.status].label}
+              </Badge>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="in-progress">In Progress</SelectItem>
+              <SelectItem value="done">Done</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             {isEditing ? (
               <Select value={bug.assignee} onValueChange={handleAssigneeChange}>
@@ -71,9 +74,11 @@ const BugCard = ({ bug, teamMembers, onUpdateBug }: BugCardProps) => {
                   {teamMembers.map((member) => (
                     <SelectItem key={member.id} value={member.id}>
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-xs text-white font-medium">
-                          {member.avatar}
-                        </div>
+                        <Avatar className="w-4 h-4">
+                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                            {member.avatar}
+                          </AvatarFallback>
+                        </Avatar>
                         {member.name}
                       </div>
                     </SelectItem>
@@ -83,18 +88,24 @@ const BugCard = ({ bug, teamMembers, onUpdateBug }: BugCardProps) => {
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 text-xs text-gray-600 hover:text-gray-900 transition-colors"
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 {assignedMember ? (
                   <>
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs text-white font-medium">
-                      {assignedMember.avatar}
-                    </div>
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                        {assignedMember.avatar}
+                      </AvatarFallback>
+                    </Avatar>
                     {assignedMember.name}
                   </>
                 ) : (
                   <>
-                    <User size={16} />
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="text-xs bg-muted text-muted-foreground">
+                        ?
+                      </AvatarFallback>
+                    </Avatar>
                     Unassigned
                   </>
                 )}
@@ -102,18 +113,18 @@ const BugCard = ({ bug, teamMembers, onUpdateBug }: BugCardProps) => {
             )}
           </div>
           
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {formatDate(bug.createdAt)}
           </span>
         </div>
 
         {bug.description && (
-          <div className="mt-3">
+          <div className="pt-2 border-t border-border">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowDetails(!showDetails)}
-              className="text-xs text-gray-600 hover:text-gray-900 p-0 h-auto font-normal"
+              className="text-xs text-muted-foreground hover:text-foreground p-0 h-auto font-normal"
             >
               <ChevronDown 
                 size={14} 
@@ -123,14 +134,14 @@ const BugCard = ({ bug, teamMembers, onUpdateBug }: BugCardProps) => {
             </Button>
             
             {showDetails && (
-              <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
                 {bug.description}
               </p>
             )}
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

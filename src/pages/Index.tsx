@@ -74,19 +74,20 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Bug Tracker</h1>
-            <p className="text-gray-600 mt-1">Log and assign bugs in seconds</p>
+            <h1 className="text-3xl font-bold text-foreground">Bug Tracker</h1>
+            <p className="text-muted-foreground mt-1">Log and assign bugs in seconds</p>
           </div>
           
           <Button 
             onClick={() => setShowForm(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg shadow-sm flex items-center gap-2 transition-colors"
+            variant="destructive"
+            className="flex items-center gap-2"
           >
             <Plus size={20} />
             Report Bug
